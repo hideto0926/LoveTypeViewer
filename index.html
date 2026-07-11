@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LoveTypeViewer — See who clicks, at a glance</title>
+<meta name="description" content="Turn the 16 LoveTypes into a living relationship map. Add your friends, tap View Relationships, and watch the best and worst matches connect with smooth lines. Free with ads · data stays on your device." />
+<link rel="icon" href="assets/icon.png" />
+<meta property="og:title" content="LoveTypeViewer — See who clicks, at a glance" />
+<meta property="og:description" content="Turn the 16 LoveTypes into a living relationship map. Add friends, tap View Relationships, and see who clicks with smooth compatibility lines." />
+<meta property="og:image" content="assets/og.png" />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#0b0710" />
+<style>
+  :root{
+    --bg:#0b0710;
+    --card:rgba(255,255,255,.05);
+    --border:rgba(255,255,255,.10);
+    --text:#f6f4fa;
+    --muted:#b3a7c2;
+    --pink:#ff4d8d;
+    --blue:#7aa8ff;
+    --grad:linear-gradient(120deg,#ff4d8d,#b45cff,#7aa8ff);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .lang-ja{display:none}
+  body.ja .lang-en{display:none}
+  body.ja .lang-ja{display:initial}
+  body.ja .lang-ja.block{display:block}
+
+  .bg-glow{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
+  .bg-glow::before,.bg-glow::after{content:"";position:absolute;border-radius:50%;filter:blur(120px);opacity:.5}
+  .bg-glow::before{width:540px;height:540px;background:#ff4d8d;top:-180px;left:-140px}
+  .bg-glow::after{width:500px;height:500px;background:#7c3aed;bottom:-200px;right:-140px}
+
+  header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,7,16,.62);border-bottom:1px solid var(--border)}
+  .nav{display:flex;align-items:center;gap:14px;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:.2px}
+  .brand img{width:34px;height:34px;border-radius:9px}
+  .nav .spacer{flex:1}
+  .nav a.link{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600}
+  .nav a.link:hover{color:var(--text)}
+  .nav a.priv{border:1px solid var(--border);padding:7px 14px;border-radius:999px;color:var(--text)}
+  .nav a.priv:hover{border-color:var(--pink);background:rgba(255,77,141,.12)}
+  .langtoggle{display:flex;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+  .langtoggle button{background:transparent;color:var(--muted);border:0;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .langtoggle button.active{background:var(--grad);color:#fff}
+
+  .hero{padding:74px 0 30px;text-align:center}
+  .hero img.appicon{width:104px;height:104px;border-radius:24px;box-shadow:0 18px 50px rgba(255,77,141,.35);margin-bottom:24px}
+  .hero h1{font-size:clamp(34px,6vw,62px);line-height:1.08;font-weight:900;letter-spacing:-.5px}
+  .hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p.sub{color:var(--muted);font-size:clamp(16px,2.4vw,20px);max-width:660px;margin:18px auto 0}
+  .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+  .primary{display:inline-flex;align-items:center;gap:10px;background:var(--grad);color:#fff;text-decoration:none;padding:14px 24px;border-radius:14px;font-weight:800;transition:transform .15s;box-shadow:0 12px 30px rgba(255,77,141,.35)}
+  .primary:hover{transform:translateY(-2px)}
+  .ghost{display:inline-flex;align-items:center;padding:14px 22px;border-radius:14px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-weight:700;transition:.15s}
+  .ghost:hover{border-color:var(--pink);background:rgba(255,77,141,.12)}
+  .note{margin-top:18px;color:var(--muted);font-size:13px}
+
+  .fxwrap{margin:46px 0 8px}
+  .fxgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .fxitem{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--border);box-shadow:0 18px 44px rgba(0,0,0,.5)}
+  .fxitem img{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;object-position:center top}
+  @media(max-width:760px){.fxgrid{grid-template-columns:repeat(2,1fr)}}
+
+  section.features{padding:36px 0 10px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:46px;align-items:center;margin:70px 0}
+  .row.rev .txt{order:2}
+  .row .shot{display:flex;justify-content:center}
+  .row .shot img{width:100%;max-width:330px;border-radius:24px;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.55)}
+  .row .shot.wide img{max-width:520px}
+  .tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;background:rgba(255,77,141,.16);color:#ffb0cd;padding:5px 11px;border-radius:999px;margin-bottom:14px}
+  .row h2{font-size:clamp(24px,3.4vw,34px);line-height:1.2;font-weight:850;margin-bottom:12px}
+  .row p{color:var(--muted);font-size:16px}
+  .row ul{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:9px}
+  .row li{display:flex;gap:10px;color:var(--text);font-size:15px}
+  .row li::before{content:"";flex:0 0 auto;width:20px;height:20px;border-radius:6px;background:var(--grad);margin-top:2px;
+    -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>") center/16px no-repeat;
+    mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='black' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/></svg>") center/16px no-repeat}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:54px 0}
+  .gcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px}
+  .gcard .ic{font-size:24px;margin-bottom:10px}
+  .gcard h3{font-size:17px;margin-bottom:6px}
+  .gcard p{color:var(--muted);font-size:14px}
+
+  .section-head{text-align:center;max-width:680px;margin:0 auto}
+  .section-head h2{font-size:clamp(26px,4vw,38px);font-weight:900;letter-spacing:-.3px}
+  .section-head p{color:var(--muted);margin-top:10px}
+
+  .final{text-align:center;padding:72px 0;margin-top:30px}
+  .final h2{font-size:clamp(26px,4vw,40px);font-weight:900;margin-bottom:10px}
+  .final p{color:var(--muted);margin-bottom:26px}
+
+  footer{border-top:1px solid var(--border);padding:34px 0;color:var(--muted);font-size:13px}
+  .foot{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center}
+  footer a{color:var(--muted);text-decoration:none}
+  footer a:hover{color:var(--text)}
+  .foot .spacer{flex:1}
+
+  @media(max-width:760px){
+    .row{grid-template-columns:1fr;gap:24px;margin:54px 0}
+    .row.rev .txt{order:0}
+    .nav a.link{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><img src="assets/icon.png" alt="LoveTypeViewer" /> LoveTypeViewer</div>
+    <div class="spacer"></div>
+    <a class="link" href="#features"><span class="lang-en">Features</span><span class="lang-ja">特長</span></a>
+    <a class="link priv" href="privacy.html"><span class="lang-en">Privacy</span><span class="lang-ja">プライバシー</span></a>
+    <div class="langtoggle">
+      <button id="btn-en" onclick="setLang('en')">EN</button>
+      <button id="btn-ja" onclick="setLang('ja')">日本語</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero wrap">
+  <img class="appicon" src="assets/icon.png" alt="LoveTypeViewer icon" />
+  <h1>
+    <span class="lang-en">See who clicks, <span class="grad">at a glance</span>.</span>
+    <span class="lang-ja">相性が、<span class="grad">ひと目で</span>わかる。</span>
+  </h1>
+  <p class="sub">
+    <span class="lang-en">LoveTypeViewer turns the 16 LoveTypes into a living relationship map. Add your friends, tap “View Relationships”, and watch the best and worst matches connect with smooth lines.</span>
+    <span class="lang-ja">16の LoveType を“動く相関図”に。友達を追加して「関係を見る」を押すだけで、相性の良し悪しがなめらかな線でつながります。</span>
+  </p>
+  <div class="cta">
+    <a class="primary" href="https://lovetype.org/" target="_blank" rel="noopener">
+      <span class="lang-en">Find your LoveType →</span><span class="lang-ja">LoveType を調べる →</span>
+    </a>
+    <a class="ghost" href="#features"><span class="lang-en">See features ↓</span><span class="lang-ja">特長を見る ↓</span></a>
+  </div>
+  <p class="note">
+    <span class="lang-en">iOS app coming soon · Free with ads · Data stays on your device</span>
+    <span class="lang-ja">iOSアプリ近日公開 · 無料（広告あり）· データは端末内に保存</span>
+  </p>
+
+  <!-- SHOWCASE -->
+  <div class="fxwrap">
+    <div class="fxgrid">
+      <div class="fxitem"><img src="assets/hero.jpg" alt="Relationship map result" loading="lazy" /></div>
+      <div class="fxitem"><img src="assets/promo-register.jpg" alt="Register and pick your type" loading="lazy" /></div>
+      <div class="fxitem"><img src="assets/promo-select.jpg" alt="Select people to compare" loading="lazy" /></div>
+      <div class="fxitem"><img src="assets/promo-map.jpg" alt="Compatibility lines" loading="lazy" /></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features wrap" id="features">
+
+  <!-- 1. 16 types -->
+  <div class="row">
+    <div class="txt">
+      <span class="tag"><span class="lang-en">16 characters</span><span class="lang-ja">16タイプ</span></span>
+      <h2><span class="lang-en">Everyone is one of 16 LoveTypes</span><span class="lang-ja">みんな、16の LoveType の誰か</span></h2>
+      <p><span class="lang-en">Based on the MBTI-style LoveType diagnosis, every person maps to one of 16 playful characters — from Captain Lion to Love Monster. Know your type already? Pick it in a tap. If not, take the free test first.</span>
+         <span class="lang-ja">MBTI由来の LoveType 診断をベースに、キャプテンライオンから恋愛モンスターまで、誰もが16のキャラクターの誰かに当てはまります。タイプを知っていればタップで選択、知らなければ無料診断へ。</span></p>
+      <ul>
+        <li><span class="lang-en">16 distinct, illustrated characters</span><span class="lang-ja">個性豊かな16キャラクター</span></li>
+        <li><span class="lang-en">Pick from a simple grid</span><span class="lang-ja">シンプルな一覧から選ぶだけ</span></li>
+        <li><span class="lang-en">Don’t know yours? Jump to the test</span><span class="lang-ja">わからない人は診断サイトへ</span></li>
+      </ul>
+    </div>
+    <div class="shot wide"><img src="assets/types.png" alt="The 16 LoveType characters" loading="lazy" /></div>
+  </div>
+
+  <!-- 2. Add your circle -->
+  <div class="row rev">
+    <div class="txt">
+      <span class="tag"><span class="lang-en">Your circle</span><span class="lang-ja">仲間を追加</span></span>
+      <h2><span class="lang-en">Add everyone in the room</span><span class="lang-ja">その場のみんなを追加</span></h2>
+      <p><span class="lang-en">Give each friend a nickname and their LoveType. Don’t know theirs? Show the built-in QR code so they can take the test on their own phone in seconds.</span>
+         <span class="lang-ja">友達ごとにニックネームと LoveType を登録。相手がタイプを知らなくても、内蔵のQRコードを見せれば、その場で自分の端末から診断できます。</span></p>
+      <ul>
+        <li><span class="lang-en">Nickname + type, that’s it</span><span class="lang-ja">ニックネームとタイプだけ</span></li>
+        <li><span class="lang-en">Share the test with a QR code</span><span class="lang-ja">QRコードで診断をシェア</span></li>
+        <li><span class="lang-en">Edit or remove anyone anytime</span><span class="lang-ja">いつでも編集・削除OK</span></li>
+      </ul>
+    </div>
+    <div class="shot"><img src="assets/promo-register.jpg" alt="Add a person and pick their type" loading="lazy" /></div>
+  </div>
+
+  <!-- 3. Relationship map -->
+  <div class="row">
+    <div class="txt">
+      <span class="tag"><span class="lang-en">The signature</span><span class="lang-ja">目玉機能</span></span>
+      <h2><span class="lang-en">A living relationship map</span><span class="lang-ja">動く相関図</span></h2>
+      <p><span class="lang-en">Select two or more people and tap “View Relationships”. Everyone is seated around the screen edge with their name facing outward — so people around the table can read it. The top-3 best and bottom-3 worst matches connect with smooth curves. Drag icons to rearrange the seats.</span>
+         <span class="lang-ja">2人以上を選んで「関係を見る」をタップ。全員が画面の縁に着席し、名前は外側を向くので、机を囲む全員が読めます。相性の良い上位3組・悪い下位3組がなめらかな曲線でつながり、アイコンはドラッグで席替え可能。</span></p>
+      <ul>
+        <li><span class="lang-en">Top 3 & bottom 3, drawn as smooth lines</span><span class="lang-ja">上位3・下位3をなめらかな線で表示</span></li>
+        <li><span class="lang-en">Tap a person for their 1st/2nd/3rd matches</span><span class="lang-ja">個人をタップで1・2・3位を表示</span></li>
+        <li><span class="lang-en">Two people? See the match as a %</span><span class="lang-ja">2人なら相性を％で表示</span></li>
+      </ul>
+    </div>
+    <div class="shot"><img src="assets/hero.jpg" alt="Relationship map with compatibility lines" loading="lazy" /></div>
+  </div>
+</section>
+
+<!-- POWER FEATURES GRID -->
+<section class="wrap">
+  <div class="section-head">
+    <h2><span class="lang-en">Made for the moment</span><span class="lang-ja">その場で盛り上がる</span></h2>
+    <p><span class="lang-en">Everything you need to spark a conversation about who clicks with whom.</span><span class="lang-ja">「誰と誰が合う？」で盛り上がるための機能がそろっています。</span></p>
+  </div>
+  <div class="grid">
+    <div class="gcard"><div class="ic">💞</div>
+      <h3><span class="lang-en">16 compatibility lenses</span><span class="lang-ja">相性16項目</span></h3>
+      <p><span class="lang-en">Physical, personality, work, money, humor, romance, family, food, hobbies, vibe… switch the lens and the lines update.</span><span class="lang-ja">身体・性格・仕事・金銭・ユーモア・恋愛・家族・食・趣味・波長… 項目を切り替えると線が変化。</span></p>
+    </div>
+    <div class="gcard"><div class="ic">〰️</div>
+      <h3><span class="lang-en">Best & worst, at a glance</span><span class="lang-ja">良し悪しが一目で</span></h3>
+      <p><span class="lang-en">Warm lines for the top matches, cool dashed lines for the tough ones.</span><span class="lang-ja">相性◎は暖色、相性△は寒色の破線で表示。</span></p>
+    </div>
+    <div class="gcard"><div class="ic">👆</div>
+      <h3><span class="lang-en">Tap for a spotlight</span><span class="lang-ja">個別スポットライト</span></h3>
+      <p><span class="lang-en">Tap a person to reveal their 1st, 2nd and 3rd best matches, fading by rank.</span><span class="lang-ja">タップでその人の1・2・3位を、順位ごとに色を薄くして表示。</span></p>
+    </div>
+    <div class="gcard"><div class="ic">💯</div>
+      <h3><span class="lang-en">Two-person % match</span><span class="lang-ja">2人なら％表示</span></h3>
+      <p><span class="lang-en">Pick just two and see a big percentage — red for a match, blue when it’s tough.</span><span class="lang-ja">2人だけ選ぶと大きな％を表示。相性が高いと赤、低いと青。</span></p>
+    </div>
+    <div class="gcard"><div class="ic">📱</div>
+      <h3><span class="lang-en">Share via QR</span><span class="lang-ja">QRでシェア</span></h3>
+      <p><span class="lang-en">Friends can take the LoveType test on their own phone from a QR code.</span><span class="lang-ja">QRコードから、友達が自分の端末で LoveType 診断を受けられます。</span></p>
+    </div>
+    <div class="gcard"><div class="ic">🔒</div>
+      <h3><span class="lang-en">On your device</span><span class="lang-ja">データは端末内</span></h3>
+      <p><span class="lang-en">Nicknames and types are stored on your device. No account required.</span><span class="lang-ja">ニックネームとタイプは端末内に保存。アカウント登録は不要。</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final wrap">
+  <h2><span class="lang-en">Ready to see the vibe?</span><span class="lang-ja">さっそく、相性を見てみよう</span></h2>
+  <p><span class="lang-en">Find your LoveType, gather your friends, and let the map do the talking.</span><span class="lang-ja">自分の LoveType を調べて、友達を集めて、相関図に語らせよう。</span></p>
+  <div class="cta">
+    <a class="primary" href="https://lovetype.org/" target="_blank" rel="noopener">
+      <span class="lang-en">Find your LoveType →</span><span class="lang-ja">LoveType を調べる →</span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="brand"><img src="assets/icon.png" alt="" style="width:26px;height:26px;border-radius:7px" /> LoveTypeViewer</div>
+    <div class="spacer"></div>
+    <a href="privacy.html"><span class="lang-en">Privacy Policy</span><span class="lang-ja">プライバシーポリシー</span></a>
+    <a href="terms.html"><span class="lang-en">Terms (EULA)</span><span class="lang-ja">利用規約（EULA）</span></a>
+    <a href="https://hideto0926.github.io/"><span class="lang-en">More apps</span><span class="lang-ja">他のアプリ</span></a>
+    <a href="mailto:hideto0926@gmail.com"><span class="lang-en">Contact</span><span class="lang-ja">お問い合わせ</span></a>
+  </div>
+  <div class="wrap" style="margin-top:14px;opacity:.7">© LoveTypeViewer. All rights reserved.</div>
+</footer>
+
+<script>
+  function setLang(l){
+    document.body.classList.toggle('ja', l==='ja');
+    document.documentElement.lang = l;
+    document.getElementById('btn-en').classList.toggle('active', l==='en');
+    document.getElementById('btn-ja').classList.toggle('active', l==='ja');
+    try{ localStorage.setItem('ltv_lang', l); }catch(e){}
+  }
+  (function(){
+    var saved=null; try{ saved=localStorage.getItem('ltv_lang'); }catch(e){}
+    var l = saved || ((navigator.language||'en').toLowerCase().startsWith('ja') ? 'ja' : 'en');
+    setLang(l);
+  })();
+</script>
+</body>
+</html>
