@@ -1,0 +1,2 @@
+# LoveTypeViewer
+LoveTypeを使って友達との関係性を見てみよう
